@@ -76,7 +76,7 @@ function makeRange(n) {
 };
 
 function randomColor(palette) {
-    const scale = chroma.scale(palette).mode('lab');
+    const scale = chroma.scale(palette).mode('lab'); //generate scale once on startup, not every call
     const colorArray = scale(Math.random()).rgb();
     const colorNumber = RGBTo24bit(colorArray);
     return colorNumber;
