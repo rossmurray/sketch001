@@ -3,7 +3,6 @@ var fnMain = (function() {
         let graphics = state.graphics;
         graphics.clear();
         for(let line of state.lines) {
-            //graphics.lineStyle(state.config.lineWidth, line.color);
             graphics.lineStyle(line.strokeWidth, line.color);
             graphics.moveTo(line.x, line.y);
             graphics.lineTo(line.dx, line.dy);
@@ -11,14 +10,13 @@ var fnMain = (function() {
     }
 
     function getConfig() {
-        let palette = ['cyan', 'navy', '#DD0099', 'pink'];
+        let palette = ['teal', 'violet', 'yellow'];
         return {
-            numLines: 1800,
+            numLines: 2000,
             margin: 50,
-            colorScale: chroma.scale(palette).mode('lch'),
-            lineWidth: [8, 8],
-            lineWigglePeriodMs: 300,
-            lineDuration: [2500, 2500],
+            colorScale: chroma.scale('Spectral').mode('lch'),
+            lineWidth: [9, 9],
+            lineDuration: [4000, 4000],
         };
     }
 
@@ -26,15 +24,6 @@ var fnMain = (function() {
         let lines = makeRange(config.numLines);
         lines = lines.map(function(x, i) {
             const line = resetLine({}, board, config);
-            anime({
-                targets: line,
-                strokeWidth: config.lineWidth[1],
-                duration: config.lineWigglePeriodMs,
-                delay: anime.random(0, 1) * (config.lineWigglePeriodMs / 2),
-                direction: 'alternate',
-                easing: 'easeInOutSine',
-                loop: true,
-            })
             return line;
         });
         return lines;
@@ -45,15 +34,15 @@ var fnMain = (function() {
         const rdx = anime.random(board.left, board.right);
         const ry = anime.random(board.top, board.bottom);
         const rdy = anime.random(board.top, board.bottom);
-        const rduration = 2500;//anime.random(config.lineDuration[0], config.lineDuration[1]);
+        const rduration = anime.random(config.lineDuration[0], config.lineDuration[1]);
         const rdelay = 0;//anime.random(0, config.lineDuration[1] * 2);
-        const endDelay = 1000;//rdelay + Math.floor(rduration / 2.5);
-        const endDuration = 1500;//rduration - (endDelay - rdelay);
+        const endDelay = rdelay + Math.floor(rduration / 2.5);
+        const endDuration = rduration - (endDelay - rdelay);
         line.x = rx;
         line.y = ry;
         line.dx = rx;
         line.dy = ry;
-        line.color = randomColor(config.colorScale);
+        line.color = RGBTo24bit(config.colorScale((rdx - board.left) / board.width).rgb());
         line.strokeWidth = config.lineWidth[0];
         anime({
             targets: line,
