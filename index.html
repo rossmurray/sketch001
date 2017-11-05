@@ -30,6 +30,13 @@
   <script src="lib/chroma.min.js"></script>
 <body>
   <canvas id="main"></canvas>
+  <script type="text/javascript">
+    (function(){
+      let canvas = document.getElementById('main');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    })();
+  </script>
   <script type="text/javascript" src="main.js"></script>
 </body>
 </html>
