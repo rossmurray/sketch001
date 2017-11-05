@@ -11,12 +11,12 @@ function update(deltaMs, state) {
 
 function getConfig() {
     return {
-        numLines: 1300,
-        margin: 20,
+        numLines: 1800,
+        margin: 50,
         palette: ['cyan', 'navy', '#DD0099', 'pink'],
-        lineWidth: [4, 7],
+        lineWidth: [8, 8],
         lineWigglePeriodMs: 300,
-        lineDuration: [2500, 3500],
+        lineDuration: [2500, 2500],
     };
 }
 
@@ -43,13 +43,15 @@ function resetLine(line, board, config) {
     const rdx = anime.random(board.left, board.right);
     const ry = anime.random(board.top, board.bottom);
     const rdy = anime.random(board.top, board.bottom);
-    const rduration = anime.random(config.lineDuration[0], config.lineDuration[1]);
-    const rdelay = anime.random(0, config.lineDuration[1] * 2);
+    const rduration = 2500;//anime.random(config.lineDuration[0], config.lineDuration[1]);
+    const rdelay = 0;//anime.random(0, config.lineDuration[1] * 2);
+    const endDelay = 1000;//rdelay + Math.floor(rduration / 2.5);
+    const endDuration = 1500;//rduration - (endDelay - rdelay);
     line.x = rx;
     line.y = ry;
     line.dx = rx;
     line.dy = ry;
-    line.color = randomColor(config.palette);
+    line.color = randomColor();
     line.strokeWidth = config.lineWidth[0];
     anime({
         targets: line,
@@ -60,14 +62,14 @@ function resetLine(line, board, config) {
         easing: 'easeInOutBack',
         x: {
             value: rdx,
-            duration: rduration,
-            delay: rdelay + Math.floor(rduration / 2.5),
+            duration: endDuration,
+            delay: endDelay,
             easing: 'easeOutBack',
         },
         y: {
             value: rdy,
-            duration: rduration,
-            delay: rdelay + Math.floor(rduration / 2.5),
+            duration: endDuration,
+            delay: endDelay,
             easing: 'easeInBack',
         },
     }).finished.then(function() {
@@ -88,9 +90,8 @@ function makeRange(n) {
     return arr.map(function (x, i) { return i });
 };
 
-function randomColor(palette) {
-    const scale = chroma.scale(palette).mode('lch'); //generate scale once on startup, not every call
-    const colorArray = scale(Math.random()).rgb();
+function randomColor() {
+    const colorArray = glob.colorScale(Math.random()).rgb();
     const colorNumber = RGBTo24bit(colorArray);
     return colorNumber;
 }
@@ -103,21 +104,30 @@ function RGBTo24bit(rgbArray) {
 }
 
 (function() {
+    let config = getConfig();
+    const colorScale = chroma.scale(config.palette).mode('lch');
+    glob = {
+        colorScale: colorScale,
+    };
     let app = new PIXI.Application(
         window.innerWidth,
         window.innerHeight,
         {
-            view: document.getElementById("main"),
+            //view: document.getElementById("main"),
             autoResize: true,
             antialias: true
         }
     );
+    document.body.appendChild(app.view);
+    let canvas = document.querySelector('canvas');
+
+    // app.renderer.on('postrender', function() {
+    // });
 
     let graphics = new PIXI.Graphics();
     graphics.clear();
     app.stage.addChild(graphics);
 
-    let config = getConfig();
     let board = makeBoardRectangle(config.margin, app.screen);
     let lines = generateLines(board, config);
     
