@@ -2,7 +2,8 @@ function update(deltaMs, state) {
     let graphics = state.graphics;
     graphics.clear();
     for(let line of state.lines) {
-        graphics.lineStyle(state.config.lineWidth, line.color);
+        //graphics.lineStyle(state.config.lineWidth, line.color);
+        graphics.lineStyle(line.strokeWidth, line.color);
         graphics.moveTo(line.x, line.y);
         graphics.lineTo(line.dx, line.dy);
     }
@@ -10,18 +11,29 @@ function update(deltaMs, state) {
 
 function getConfig() {
     return {
-        numLines: 55,
+        numLines: 1300,
         margin: 20,
-        palette: ['cyan', 'navy', 'pink'],
-        lineWidth: 10,
+        palette: ['cyan', 'navy', '#DD0099', 'pink'],
+        lineWidth: [4, 7],
+        lineWigglePeriodMs: 300,
         lineDuration: [2500, 3500],
     };
 }
 
 function generateLines(board, config) {
     let lines = makeRange(config.numLines);
-    lines = lines.map(function(x) {
-        return resetLine({}, board, config);
+    lines = lines.map(function(x, i) {
+        const line = resetLine({}, board, config);
+        anime({
+            targets: line,
+            strokeWidth: config.lineWidth[1],
+            duration: config.lineWigglePeriodMs,
+            delay: anime.random(0, 1) * (config.lineWigglePeriodMs / 2),
+            direction: 'alternate',
+            easing: 'easeInOutSine',
+            loop: true,
+        })
+        return line;
     });
     return lines;
 }
@@ -37,7 +49,8 @@ function resetLine(line, board, config) {
     line.y = ry;
     line.dx = rx;
     line.dy = ry;
-    line.color = randomColor(config.palette)
+    line.color = randomColor(config.palette);
+    line.strokeWidth = config.lineWidth[0];
     anime({
         targets: line,
         dx: rdx,
@@ -76,7 +89,7 @@ function makeRange(n) {
 };
 
 function randomColor(palette) {
-    const scale = chroma.scale(palette).mode('lab'); //generate scale once on startup, not every call
+    const scale = chroma.scale(palette).mode('lch'); //generate scale once on startup, not every call
     const colorArray = scale(Math.random()).rgb();
     const colorNumber = RGBTo24bit(colorArray);
     return colorNumber;
