@@ -10,13 +10,14 @@ var fnMain = (function() {
     }
 
     function getConfig() {
-        let palette = ['teal', 'violet', 'yellow'];
+        let palette = ['teal', 'navy', '#883322'];
         return {
-            numLines: 2000,
+            numLines: 1000,
             margin: 50,
-            colorScale: chroma.scale('Spectral').mode('lch'),
-            lineWidth: [9, 9],
+            colorScale: chroma.scale(palette).mode('hsl'),
+            lineWidth: [14, 14],
             lineDuration: [4000, 4000],
+            backgroundColor: 0xC0C0CC,
         };
     }
 
@@ -43,7 +44,7 @@ var fnMain = (function() {
         line.dx = rx;
         line.dy = ry;
         line.color = RGBTo24bit(config.colorScale((rdx - board.left) / board.width).rgb());
-        line.strokeWidth = config.lineWidth[0];
+        line.strokeWidth = anime.random(config.lineWidth[0], config.lineWidth[1]);
         anime({
             targets: line,
             dx: rdx,
@@ -105,6 +106,7 @@ var fnMain = (function() {
                 antialias: true
             }
         );
+        app.renderer.backgroundColor = config.backgroundColor;
 
         // app.renderer.on('postrender', function() {
         // });
