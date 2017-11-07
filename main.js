@@ -7,6 +7,7 @@ var fnMain = (function() {
             graphics.moveTo(line.x, line.y);
             graphics.lineTo(line.dx, line.dy);
         }
+        state.recorder.capture(state.app.renderer.view);
     }
 
     function getConfig() {
@@ -95,7 +96,7 @@ var fnMain = (function() {
         return result;
     }
 
-    (function() {
+    return (function(recorder) {
         const config = getConfig();
         const mainel = document.getElementById("main");
         let app = new PIXI.Application({
@@ -103,7 +104,7 @@ var fnMain = (function() {
                 height: mainel.height,
                 view: mainel,
                 autoResize: true,
-                antialias: true
+                antialias: true,
             }
         );
         app.renderer.backgroundColor = config.backgroundColor;
@@ -124,9 +125,12 @@ var fnMain = (function() {
             graphics: graphics,
             board: board,
             lines: lines,
+            recorder: recorder || {capture: function(){}},
         };
         app.ticker.add(function(delta){
             update(delta, state);
         });
-    })();
+
+        return state;
+    });
 })();

@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>record</title>
+  <style>
+  html {
+    height: 100%;
+    width: 100%;
+  }
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    border: 0;
+  }
+  canvas#main {
+    position: absolute;
+    left: 0px;
+    top: 40px;
+  }
+  </style>
+</head>
+  <script src="lib/pixi.min.js"></script>
+  <script src="lib/anime.min.js"></script>
+  <script src="lib/chroma.min.js"></script>
+  <script src="lib/CCapture.all.min.js"></script>
+<body>
+  <button id="recordButton">Record</button>
+  <canvas id="main"></canvas>
+  <script type="text/javascript">
+    (function(){
+      const canvas = document.getElementById('main');
+      canvas.width = 800;
+      canvas.height = 600;
+    })();
+    //   const recordTime = 6000;
+    //   const recordButton = document.getElementById('recordButton');
+    //   recordButton.onclick = function() {
+    //     recorder.startRecording();
+    //     recordButton.disabled = true;
+
+    //     setTimeout(function() {
+    //       recordButton.disabled = false;
+    //       recorder.stopRecording(function(blob) {
+    //         const url = URL.createObjectURL(recorder.getBlob());
+    //         recorder.save('001.webm');
+    //         //saveData(blob, "001.gif");
+    //         recorder.clearRecordedData();
+    //       })
+    //     }, recordTime);
+    //   };
+    // })();
+
+    // function saveData(blob, filename) {
+    //   let a = document.createElement('a');
+    //   document.body.appendChild(a);
+    //   a.style = "display: none";
+    //   let url = window.URL.createObjectURL(blob);
+    //   a.href = url;
+    //   a.download = filename;
+    //   a.click();
+    //   window.URL.revokeObjectURL(url);
+    // }
+  </script>
+  <script type="text/javascript">
+    (function() {
+      const recorder = new CCapture({
+        framerate: 60,
+        format: 'webm',
+        timeLimit: 1,
+        verbose: true,
+      });
+      window.recorder = recorder;
+      recordButton.onclick = function() {
+        recorder.start();
+      };
+    })();
+  </script>
+  <script type="text/javascript" src="main.js"></script>
+  <script type="text/javascript">
+    (function() {
+      fnMain(window.recorder);
+    })();
+  </script>
+</body>
+</html>
