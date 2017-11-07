@@ -10,14 +10,14 @@ var fnMain = (function() {
     }
 
     function getConfig() {
-        let palette = ['teal', 'navy', '#883322'];
+        let palette = ['#6f32b0', '#000000', '#191754', '#e2b9ff'];
         return {
             numLines: 1000,
             margin: 50,
-            colorScale: chroma.scale(palette).mode('hsl'),
+            colorScale: chroma.scale(palette).mode('lab'),
             lineWidth: [14, 14],
             lineDuration: [4000, 4000],
-            backgroundColor: 0xC0C0CC,
+            backgroundColor: 0xE0F7FA,
         };
     }
 
