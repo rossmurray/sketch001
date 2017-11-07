@@ -26,7 +26,10 @@
   <script src="lib/chroma.min.js"></script>
   <script src="lib/CCapture.all.min.js"></script>
 <body>
+    <button id="startButton">Start</button>
   <button id="recordButton">Record</button>
+  <button id="bothButton">Both</button>
+  <p id="progress" style="display: inline;">0%</p>
   <canvas id="main"></canvas>
   <script type="text/javascript">
     (function(){
@@ -34,54 +37,42 @@
       canvas.width = 800;
       canvas.height = 600;
     })();
-    //   const recordTime = 6000;
-    //   const recordButton = document.getElementById('recordButton');
-    //   recordButton.onclick = function() {
-    //     recorder.startRecording();
-    //     recordButton.disabled = true;
-
-    //     setTimeout(function() {
-    //       recordButton.disabled = false;
-    //       recorder.stopRecording(function(blob) {
-    //         const url = URL.createObjectURL(recorder.getBlob());
-    //         recorder.save('001.webm');
-    //         //saveData(blob, "001.gif");
-    //         recorder.clearRecordedData();
-    //       })
-    //     }, recordTime);
-    //   };
-    // })();
-
-    // function saveData(blob, filename) {
-    //   let a = document.createElement('a');
-    //   document.body.appendChild(a);
-    //   a.style = "display: none";
-    //   let url = window.URL.createObjectURL(blob);
-    //   a.href = url;
-    //   a.download = filename;
-    //   a.click();
-    //   window.URL.revokeObjectURL(url);
-    // }
   </script>
   <script type="text/javascript">
     (function() {
-      const recorder = new CCapture({
+      const captureConfig = {
         framerate: 60,
         format: 'webm',
-        timeLimit: 1,
-        verbose: true,
-      });
-      window.recorder = recorder;
+        timeLimit: 5,
+      };
+      const recorder = new CCapture(captureConfig);
+      const canvas = document.getElementById('main');
+      const recordButton = document.getElementById('recordButton');
       recordButton.onclick = function() {
         recorder.start();
+        setTimeout(progress, 100);
       };
+      const startButton = document.getElementById('startButton');
+      startButton.onclick = function() {
+        window.fnMain(recorder)
+      };
+      const bothButton = document.getElementById('bothButton');
+      bothButton.onclick = function() {
+        window.fnMain(recorder);
+        setTimeout(function(){
+          recorder.start();
+          setTimeout(progress, 100);
+        }, 100);
+      };
+      let timePassed = 0;
+      const progel = document.getElementById('progress');
+      function progress() {
+        timePassed += 100;
+        progel.innerHTML = "" + +(timePassed / 1000).toFixed(2);
+        setTimeout(progress, 100);
+      }
     })();
   </script>
   <script type="text/javascript" src="main.js"></script>
-  <script type="text/javascript">
-    (function() {
-      fnMain(window.recorder);
-    })();
-  </script>
 </body>
 </html>

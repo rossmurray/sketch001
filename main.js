@@ -1,5 +1,8 @@
 var fnMain = (function() {
-    function update(deltaMs, state) {
+    function render(deltaMs, state) {
+        requestAnimationFrame(function(timestamp){
+            render(timestamp, state);
+        });
         let graphics = state.graphics;
         graphics.clear();
         for(let line of state.lines) {
@@ -7,6 +10,7 @@ var fnMain = (function() {
             graphics.moveTo(line.x, line.y);
             graphics.lineTo(line.dx, line.dy);
         }
+        state.app.ticker.update(deltaMs);
         state.recorder.capture(state.app.renderer.view);
     }
 
@@ -37,7 +41,7 @@ var fnMain = (function() {
         const ry = anime.random(board.top, board.bottom);
         const rdy = anime.random(board.top, board.bottom);
         const rduration = anime.random(config.lineDuration[0], config.lineDuration[1]);
-        const rdelay = 0;//anime.random(0, config.lineDuration[1] * 2);
+        const rdelay = 0;
         const endDelay = rdelay + Math.floor(rduration / 2.5);
         const endDuration = rduration - (endDelay - rdelay);
         line.x = rx;
@@ -109,8 +113,9 @@ var fnMain = (function() {
         );
         app.renderer.backgroundColor = config.backgroundColor;
 
-        // app.renderer.on('postrender', function() {
-        // });
+        app.renderer.on('postrender', function() {
+            
+        });
 
         let graphics = new PIXI.Graphics();
         graphics.clear();
@@ -127,8 +132,9 @@ var fnMain = (function() {
             lines: lines,
             recorder: recorder || {capture: function(){}},
         };
-        app.ticker.add(function(delta){
-            update(delta, state);
+        app.ticker.autoStart = false;
+        requestAnimationFrame(function(timestamp){
+            render(timestamp, state);
         });
 
         return state;
