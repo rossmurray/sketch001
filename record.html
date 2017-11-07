@@ -34,7 +34,7 @@
   <script type="text/javascript">
     (function(){
       const canvas = document.getElementById('main');
-      canvas.width = 800;
+      canvas.width = 600;
       canvas.height = 600;
     })();
   </script>
@@ -43,14 +43,14 @@
       const captureConfig = {
         framerate: 60,
         format: 'webm',
-        timeLimit: 5,
+        timeLimit: 4,
       };
       const recorder = new CCapture(captureConfig);
       const canvas = document.getElementById('main');
       const recordButton = document.getElementById('recordButton');
       recordButton.onclick = function() {
         recorder.start();
-        setTimeout(progress, 100);
+        setTimeout(progress, 1000);
       };
       const startButton = document.getElementById('startButton');
       startButton.onclick = function() {
@@ -61,15 +61,15 @@
         window.fnMain(recorder);
         setTimeout(function(){
           recorder.start();
-          setTimeout(progress, 100);
+          setTimeout(progress, 1000);
         }, 100);
       };
       let timePassed = 0;
       const progel = document.getElementById('progress');
       function progress() {
-        timePassed += 100;
+        timePassed += 1000;
         progel.innerHTML = "" + +(timePassed / 1000).toFixed(2);
-        setTimeout(progress, 100);
+        setTimeout(progress, 1000);
       }
     })();
   </script>

@@ -8,7 +8,7 @@ var fnMain = (function() {
         for(let line of state.lines) {
             graphics.lineStyle(line.strokeWidth, line.color);
             graphics.moveTo(line.x, line.y);
-            graphics.lineTo(line.dx, line.dy);
+            graphics.lineTo(line.x2, line.y2);
         }
         state.app.ticker.update(deltaMs);
         state.recorder.capture(state.app.renderer.view);
@@ -17,69 +17,78 @@ var fnMain = (function() {
     function getConfig() {
         let palette = ['#6f32b0', '#000000', '#191754', '#b9f0d5'];
         return {
-            numLines: 1000,
-            margin: 50,
+            numLines: 800,
+            margin: 0.04,
             colorScale: chroma.scale(palette).mode('lab'),
-            lineWidth: [14, 14],
-            lineDuration: [4000, 4000],
+            lineWidth: 0.019,
+            lineDuration: 2000,
             backgroundColor: 0xF0F7FA,
         };
     }
 
     function generateLines(board, config) {
-        let lines = makeRange(config.numLines);
-        lines = lines.map(function(x, i) {
-            const line = resetLine({}, board, config);
-            return line;
-        });
+        let lines = makeRange(config.numLines).map(() => {return {};});
+        resetLines(lines, board, config);
+        const animation = animateLines(lines, board, config);
         return lines;
     }
 
-    function resetLine(line, board, config) {
-        const rx = anime.random(board.left, board.right);
-        const rdx = anime.random(board.left, board.right);
-        const ry = anime.random(board.top, board.bottom);
-        const rdy = anime.random(board.top, board.bottom);
-        const rduration = anime.random(config.lineDuration[0], config.lineDuration[1]);
-        const rdelay = 0;
-        const endDelay = rdelay + Math.floor(rduration / 2.5);
-        const endDuration = rduration - (endDelay - rdelay);
-        line.x = rx;
-        line.y = ry;
-        line.dx = rx;
-        line.dy = ry;
-        line.color = RGBTo24bit(config.colorScale((rdx - board.left) / board.width).rgb());
-        line.strokeWidth = anime.random(config.lineWidth[0], config.lineWidth[1]);
-        anime({
-            targets: line,
-            dx: rdx,
-            dy: rdy,
-            delay: rdelay,
-            duration: rduration,
-            easing: 'easeInOutBack',
+    function animateLines(lines, board, config) {
+        const animation = anime({
+            targets: lines,
             x: {
-                value: rdx,
-                duration: endDuration,
-                delay: endDelay,
+                value: el => el.dx,
+                delay: config.lineDuration * 0.4,
+                duration: config.lineDuration * 0.6,
                 easing: 'easeOutBack',
             },
             y: {
-                value: rdy,
-                duration: endDuration,
-                delay: endDelay,
+                value: el => el.dy,
+                delay: config.lineDuration * 0.4,
+                duration: config.lineDuration * 0.6,
                 easing: 'easeInBack',
             },
-        }).finished.then(function() {
-            resetLine(line, board, config);
+            x2: {
+                value: (el) => el.dx,
+                duration: config.lineDuration,
+                easing: 'easeInOutBack',
+            },
+            y2: {
+                value: (el) => el.dy,
+                duration: config.lineDuration,
+                easing: 'easeInOutBack',
+            },
+            complete: function() {
+                resetLines(lines, board, config)
+                animateLines(lines, board, config);
+            },
         });
-        return line;
+        return animation;
+    }
+
+    function resetLines(lines, board, config) {
+        for(let line of lines) {
+            const rx = anime.random(board.left, board.right);
+            const rdx = anime.random(board.left, board.right);
+            const ry = anime.random(board.top, board.bottom);
+            const rdy = anime.random(board.top, board.bottom);
+            line.x = rx;
+            line.y = ry;
+            line.x2 = rx;
+            line.y2 = ry;
+            line.dx = rdx;
+            line.dy = rdy;
+            line.color = RGBTo24bit(config.colorScale((rdx - board.left) / board.width).rgb());
+            line.strokeWidth = config.lineWidth * board.width;
+        }
     }
 
     function makeBoardRectangle(margin, viewRectangle) {
-        const margin2 = margin * 2;
-        const boardWidth = viewRectangle.width - margin2;
-        const boardHeight = viewRectangle.height - margin2;
-        return new PIXI.Rectangle(margin, margin, boardWidth, boardHeight);
+        const realMargin = viewRectangle.width * margin;
+        const realMargin2 = realMargin * 2;
+        const boardWidth = viewRectangle.width - realMargin2;
+        const boardHeight = viewRectangle.height - realMargin2;
+        return new PIXI.Rectangle(realMargin, realMargin, boardWidth, boardHeight);
     }
 
     function makeRange(n) {
