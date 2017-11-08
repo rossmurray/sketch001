@@ -34,23 +34,23 @@
   <script type="text/javascript">
     (function(){
       const canvas = document.getElementById('main');
-      canvas.width = 600;
-      canvas.height = 600;
+      canvas.width = 1080;
+      canvas.height = 1080;
     })();
   </script>
   <script type="text/javascript">
     (function() {
+      const timeLimit = 12030;
       const captureConfig = {
         framerate: 60,
         format: 'webm',
-        timeLimit: 4,
+        quality: 90,
       };
       const recorder = new CCapture(captureConfig);
       const canvas = document.getElementById('main');
       const recordButton = document.getElementById('recordButton');
       recordButton.onclick = function() {
-        recorder.start();
-        setTimeout(progress, 1000);
+        recordAndDownload(recorder, timeLimit);
       };
       const startButton = document.getElementById('startButton');
       startButton.onclick = function() {
@@ -59,17 +59,31 @@
       const bothButton = document.getElementById('bothButton');
       bothButton.onclick = function() {
         window.fnMain(recorder);
-        setTimeout(function(){
-          recorder.start();
-          setTimeout(progress, 1000);
-        }, 100);
+        recordAndDownload(recorder, timeLimit);
       };
+
       let timePassed = 0;
       const progel = document.getElementById('progress');
       function progress() {
-        timePassed += 1000;
-        progel.innerHTML = "" + +(timePassed / 1000).toFixed(2);
-        setTimeout(progress, 1000);
+        timePassed += 100;
+        progel.innerHTML = "" + Math.floor((timePassed / timeLimit) * 100) + "%";
+        if(timePassed < timeLimit) {
+          setTimeout(progress, 100);
+        }
+        else {
+          progel.innerHTML = "100%";
+        }
+      }
+
+      function recordAndDownload(recorder, durationMs) {
+        recorder.start();
+        setTimeout(() => {
+          recorder.stop();
+          setTimeout(() => {
+            recorder.save();
+          }, 100);
+        }, durationMs);
+        setTimeout(progress, 100);
       }
     })();
   </script>

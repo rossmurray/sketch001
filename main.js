@@ -10,18 +10,18 @@ var fnMain = (function() {
             graphics.moveTo(line.x, line.y);
             graphics.lineTo(line.x2, line.y2);
         }
-        state.app.ticker.update(deltaMs);
+        state.app.renderer.render(state.graphics);
         state.recorder.capture(state.app.renderer.view);
     }
 
     function getConfig() {
         let palette = ['#6f32b0', '#000000', '#191754', '#b9f0d5'];
         return {
-            numLines: 800,
+            numLines: 2000,
             margin: 0.04,
             colorScale: chroma.scale(palette).mode('lab'),
-            lineWidth: 0.019,
-            lineDuration: 2000,
+            lineWidth: 0.0095,
+            lineDuration: 6000,
             backgroundColor: 0xF0F7FA,
         };
     }
@@ -29,7 +29,6 @@ var fnMain = (function() {
     function generateLines(board, config) {
         let lines = makeRange(config.numLines).map(() => {return {};});
         resetLines(lines, board, config);
-        const animation = animateLines(lines, board, config);
         return lines;
     }
 
@@ -60,8 +59,9 @@ var fnMain = (function() {
             },
             complete: function() {
                 resetLines(lines, board, config)
-                animateLines(lines, board, config);
+                animateLines(lines, board, config).play();
             },
+            autoplay: false,
         });
         return animation;
     }
@@ -109,43 +109,35 @@ var fnMain = (function() {
         return result;
     }
 
-    return (function(recorder) {
+    return (function() {
         const config = getConfig();
         const mainel = document.getElementById("main");
         let app = new PIXI.Application({
-                width: mainel.width,
-                height: mainel.height,
-                view: mainel,
-                autoResize: true,
-                antialias: true,
-            }
-        );
-        app.renderer.backgroundColor = config.backgroundColor;
-
-        app.renderer.on('postrender', function() {
-            
+            width: mainel.width,
+            height: mainel.height,
+            view: mainel,
+            autoResize: true,
+            antialias: true,
         });
+        app.renderer.backgroundColor = config.backgroundColor;
+        app.ticker.autoStart = false;
 
         let graphics = new PIXI.Graphics();
-        graphics.clear();
-        app.stage.addChild(graphics);
-
         let board = makeBoardRectangle(config.margin, app.screen);
         let lines = generateLines(board, config);
-        
         let state = {
             config: config,
             app: app,
             graphics: graphics,
             board: board,
             lines: lines,
-            recorder: recorder || {capture: function(){}},
         };
-        app.ticker.autoStart = false;
-        requestAnimationFrame(function(timestamp){
-            render(timestamp, state);
-        });
-
-        return state;
-    });
+        return function(recorder) {
+            state.recorder = recorder || {capture: function(){}};
+            const animation = animateLines(lines, board, config);
+            render(Date.now(), state);
+            animation.play();
+            return state;
+        }
+    })();
 })();
